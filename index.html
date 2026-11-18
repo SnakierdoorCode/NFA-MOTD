@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFA DarkRP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #000000;
+    --blood: #ff1f2d;
+    --soft: #ff6b73;
+    --body-red: #e04a52;
+    --ember: #c4161c;
+    --dried: #7a0c10;
+    --ash: #2a0709;
+    --display: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+    --text: "Barlow", "Trebuchet MS", Verdana, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    margin: 0;
+    background: var(--black);
+    color: var(--blood);
+    font-family: var(--text);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 80% 38% at 50% 0%, rgba(196, 22, 28, 0.28), transparent 70%),
+      var(--black);
+    min-height: 100vh;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0, rgba(0,0,0,0.25) 1px, transparent 1px, transparent 3px);
+    opacity: 0.45;
+  }
+  .page { max-width: 880px; margin: 0 auto; padding: 48px 28px 72px; position: relative; z-index: 1; }
+
+  /* Header */
+  header { border-left: 6px solid var(--blood); padding-left: 22px; margin-bottom: 32px; }
+  .badge { display: inline-block; margin: 0 0 10px; padding: 2px 10px; background: var(--blood); color: var(--black); font-family: var(--display); font-size: 22px; letter-spacing: 0.06em; }
+  .sign {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(76px, 17vw, 156px);
+    line-height: 0.88;
+    margin: 0;
+    color: var(--blood);
+    text-shadow: 0 0 10px rgba(255,31,45,0.8), 0 0 36px rgba(255,31,45,0.45), 0 0 80px rgba(196,22,28,0.35);
+    animation: flicker 2.6s linear 1 both;
+  }
+  .sign span { display: block; font-size: 0.5em; letter-spacing: 0.2em; color: var(--ember); text-shadow: 0 0 14px rgba(196,22,28,0.6); }
+  .welcome { margin: 18px 0 14px; color: var(--soft); font-size: 20px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .tags li { padding: 3px 12px; border: 1px solid var(--ember); color: var(--soft); font-size: 15px; }
+
+  @keyframes flicker {
+    0%, 8%, 12%, 20%, 24%, 100% { opacity: 1; }
+    9%, 21% { opacity: 0.25; }
+    10% { opacity: 0.8; }
+    22% { opacity: 0.1; }
+    23% { opacity: 0.9; }
+    50% { opacity: 1; }
+    52% { opacity: 0.55; }
+    53% { opacity: 1; }
+  }
+
+  /* Quick numbers */
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0; margin: 0 0 28px; }
+  .num { padding: 14px 14px 12px; border: 1px solid var(--dried); margin: 0 -1px -1px 0; background: rgba(122,12,16,0.14); }
+  .num strong { display: block; font-family: var(--display); font-weight: 400; font-size: 36px; line-height: 1; color: var(--blood); }
+  .num span { font-size: 13px; line-height: 1.25; color: var(--body-red); display: block; margin-top: 4px; }
+
+  /* Section nav */
+  nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 44px; padding-bottom: 20px; border-bottom: 1px solid var(--dried); }
+  nav a { padding: 5px 12px; background: var(--ash); color: var(--soft); text-decoration: none; font-size: 15px; border-bottom: 2px solid var(--ember); }
+  nav a:hover { background: var(--ember); color: var(--black); }
+
+  /* Sections */
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 40px;
+    letter-spacing: 0.03em;
+    margin: 0 0 14px;
+    color: var(--blood);
+  }
+  h2 .n { color: var(--dried); font-size: 56px; line-height: 0.8; }
+
+  .rules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--dried); }
+  .rules > li { padding: 14px 0; border-bottom: 1px solid var(--dried); }
+  .rules b { color: var(--blood); font-weight: 600; font-size: 18px; }
+  .rules .d { color: var(--body-red); font-size: 16px; display: block; margin-top: 2px; }
+  .sub { list-style: none; margin: 8px 0 0; padding: 0 0 0 14px; border-left: 2px solid var(--dried); }
+  .sub li { color: var(--body-red); font-size: 16px; padding: 3px 0 3px 10px; }
+
+  /* Reporting + admins */
+  .report { background: var(--ash); border-left: 4px solid var(--blood); padding: 18px 22px; }
+  .report p { margin: 0 0 8px; color: var(--soft); }
+  .report p:last-child { margin: 0; }
+  kbd { font-family: var(--display); font-size: 20px; padding: 0 9px; color: var(--black); background: var(--blood); border-radius: 3px; box-shadow: 0 2px 0 var(--dried); }
+  .admins { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .admin { padding: 14px 16px; border: 1px solid var(--dried); }
+  .admin strong { display: block; font-family: var(--display); font-weight: 400; font-size: 26px; color: var(--blood); }
+  .admin span { font-size: 14px; color: var(--body-red); }
+
+  footer { border-top: 1px solid var(--dried); padding-top: 20px; color: var(--ember); font-size: 15px; }
+  footer b { color: var(--blood); }
+
+  :focus-visible { outline: 2px solid var(--blood); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .sign { animation: none; } html { scroll-behavior: auto; } }
+  @media (max-width: 520px) {
+    .page { padding: 32px 18px 56px; }
+    header { padding-left: 16px; }
+    h2 { font-size: 32px; }
+    h2 .n { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header>
+    <p class="badge">NEW</p>
+    <h1 class="sign">NFA<span>DarkRP</span></h1>
+    <p class="welcome">Welcome to NFA DarkRP. Enjoy your stay!</p>
+    <ul class="tags">
+      <li>Semi-Serious</li>
+      <li>FastDL</li>
+      <li>50k Start</li>
+      <li>HighFPS</li>
+    </ul>
+  </header>
+
+  <div class="numbers" aria-label="Key numbers">
+    <div class="num"><strong>3 min</strong><span>Stay out of your NLR zone</span></div>
+    <div class="num"><strong>10 min</strong><span>Longest raid</span></div>
+    <div class="num"><strong>20 min</strong><span>Raid cooldown</span></div>
+    <div class="num"><strong>$5,000</strong><span>Max mugging demand</span></div>
+    <div class="num"><strong>$10,000</strong><span>Max ransom</span></div>
+    <div class="num"><strong>4 sec</strong><span>Min keypad hold</span></div>
+  </div>
+
+  <nav aria-label="Sections">
+    <a href="#general">General</a>
+    <a href="#roleplay">Roleplay</a>
+    <a href="#raiding">Raiding</a>
+    <a href="#building">Building</a>
+    <a href="#jobs">Jobs</a>
+    <a href="#report">Reporting</a>
+    <a href="#admins">Admins</a>
+  </nav>
+
+  <section id="general">
+    <h2><span class="n">1</span>Community &amp; General Rules</h2>
+    <ul class="rules">
+      <li><b>No Disrespect / Harassment</b><span class="d">Do not harass, grief, troll, or disrespect other players out-of-character (OOC).</span></li>
+      <li><b>Zero Tolerance for Hate Speech</b><span class="d">Racist, sexist, homophobic, or derogatory slurs and symbols are strictly prohibited, even in roleplay.</span></li>
+      <li><b>No Spam</b><span class="d">Do not mic-spam, chat-spam, advert-spam, or job-spam.</span></li>
+      <li><b>No Exploits or Cheating</b><span class="d">Do not abuse map glitches, Lua exploits, third-party cheats, macros, or auto-clickers. Report bugs to staff.</span></li>
+      <li><b>No Impersonation</b><span class="d">Do not copy another player’s name, a staff member’s name, or pretend to be staff.</span></li>
+      <li><b>No Scamming / DDoS Threats</b><span class="d">Do not scam players on trades or jobs. Any DDoS, doxxing, or hacking threats result in a permanent ban.</span></li>
+      <li><b>No False Reports</b><span class="d">Do not submit troll or intentionally false @ reports.</span></li>
+      <li><b>Staff Decisions Are Final</b><span class="d">Do not argue with staff during active sits. If you disagree with a punishment, appeal it on our Discord.</span></li>
+    </ul>
+  </section>
+
+  <section id="roleplay">
+    <h2><span class="n">2</span>Core Roleplay Rules</h2>
+    <ul class="rules">
+      <li><b>No RDM (Random Deathmatch)</b><span class="d">You may not kill or damage another player without a valid RP reason. Verbal disrespect or mic spam is not a valid reason to kill someone.</span></li>
+      <li><b>No NLR (New Life Rule)</b><span class="d">When you die, you forget your previous life and all events leading to your death. You must stay out of your red NLR zone for 3 minutes and cannot return to an active raid.</span></li>
+      <li><b>No FailRP / Job Abuse</b><span class="d">Act according to your job’s role. Do not switch jobs to give yourself weapons, printers, or shipments and immediately switch back.</span></li>
+      <li><b>No Spawn Abuse</b><span class="d">Do not arrest, mug, kidnap, build, or shoot inside or into spawn. Do not run into spawn to escape an active RP situation.</span></li>
+      <li><b>No Metagaming</b><span class="d">Do not use OOC chat, Discord calls, or spectator info to gain an unfair advantage in RP.</span></li>
+      <li><b>Proper Adverts Only</b><span class="d">Do not use /advert for OOC talk. Do not stack or chain adverts (e.g., Raid/Assist/Mug/Over in one line).</span></li>
+      <li><b>No Body Blocking / Door Spam</b><span class="d">Do not block doorways with your body or spam E on doors to prevent players from entering or leaving.</span></li>
+      <li><b>Name Change Cooldown</b><span class="d">Do not change your RP name more than 3 times within 30 minutes.</span></li>
+    </ul>
+  </section>
+
+  <section id="raiding">
+    <h2><span class="n">3</span>Raiding, Mugging &amp; Kidnapping</h2>
+    <ul class="rules">
+      <li><b>Advert Requirements</b><span class="d">You must /advert Raid before lockpicking, keypad cracking, or breaching a base, and /advert Over when finished.</span></li>
+      <li><b>Raid Duration &amp; Cooldown</b><span class="d">Raids may last up to 10 minutes. You must wait 20 minutes before raiding the same player, base, or PD again.</span></li>
+      <li><b>No Chain Raiding</b><span class="d">You may not assist another group in raiding a base you recently raided to bypass your 20-minute cooldown.</span></li>
+      <li><b>No Random Killing During Raids</b><span class="d">You may only kill players inside the building being raided or armed defenders actively shooting at you from outside.</span></li>
+      <li><b>Mugging Rules</b><span class="d">Only criminal/raiding jobs may mug. You must /advert Mug with a maximum demand of $5,000 and give the victim at least 10 seconds to comply before shooting. You cannot mug the same player within 15 minutes.</span></li>
+      <li><b>Kidnapping Rules</b><span class="d">Only designated kidnapping jobs may kidnap. Maximum ransom is $10,000, and you may not hold a hostage for more than 10 minutes.</span></li>
+    </ul>
+  </section>
+
+  <section id="building">
+    <h2><span class="n">4</span>Building &amp; Basing Rules</h2>
+    <ul class="rules">
+      <li><b>No Prop Abuse</b><span class="d">No prop climbing, prop surfing, prop pushing, prop killing, or prop blocking public areas and unowned buildings.</span></li>
+      <li><b>No Street Building</b><span class="d">Do not build in the streets or on sidewalks unless your job explicitly allows it (e.g., Hobo or Gun Dealer stand).</span></li>
+      <li><b>Fading Door &amp; Keypad Rules</b>
+        <ul class="sub">
+          <li>Every fading door must have at least 2 working keypads/buttons (one on the outside, one on the inside) placed visibly right next to the door.</li>
+          <li>Minimum keypad hold length is 4 seconds.</li>
+          <li>Maximum of 3 fading doors per entrance path into your base.</li>
+          <li>No Fading Door Abuse (FDA): Do not use keyboard binds to rapidly open/close fading doors to shoot through them.</li>
+        </ul>
+      </li>
+      <li><b>No Crouch / Maze / One-Way Bases</b>
+        <ul class="sub">
+          <li>Players must be able to walk upright through your entire base. Never force raiders to crouch or jump.</li>
+          <li>No pitch-black bases, invisible/no-collided false walls, or pixel-peeking shooting slits.</li>
+        </ul>
+      </li>
+      <li><b>KOS Signs</b><span class="d">Kill-On-Sight (KOS) signs are only valid for the interior of your owned base. You cannot set a KOS line on a public sidewalk or street.</span></li>
+    </ul>
+  </section>
+
+  <section id="jobs">
+    <h2><span class="n">5</span>Job-Specific Rules</h2>
+    <ul class="rules">
+      <li><b>Civil Protection / Police / Mayor</b>
+        <ul class="sub">
+          <li>Government jobs may not own money printers, grow drugs, or raid without a valid warrant.</li>
+          <li>Random arrests (RDA) and random weapon checks are prohibited.</li>
+          <li>Mayors may not create “minge laws” (e.g., “Walking on sidewalks is KOS”). All laws must be reasonable.</li>
+        </ul>
+      </li>
+      <li><b>Gun Dealers / Black Market Dealers</b>
+        <ul class="sub">
+          <li>You must own a public shop and sell to customers. Do not self-supply and switch jobs.</li>
+        </ul>
+      </li>
+      <li><b>Hitmen</b>
+        <ul class="sub">
+          <li>You may only accept hits through the hit menu and must not advertise hits in /advert.</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section id="report">
+    <h2>Reporting Rulebreakers</h2>
+    <div class="report">
+      <p>Contact an available admin on this server and let them know.</p>
+      <p>Use <kbd>@</kbd> before typing a chat message to send it to admins.</p>
+      <p>If no admin is available, note the player’s name and the current time, then let an admin know as soon as they are available.</p>
+    </div>
+  </section>
+
+  <section id="admins">
+    <h2>Our Admins</h2>
+    <!-- Edit the names and roles below, or delete the cards you don't need. -->
+    <div class="admins">
+      <div class="admin"><strong>Admin Name</strong><span>Owner</span></div>
+      <div class="admin"><strong>Admin Name</strong><span>Admin</span></div>
+      <div class="admin"><strong>Admin Name</strong><span>Moderator</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <b>Not sure about something? Ask an admin before you act.</b> Appeals go through our Discord.
+  </footer>
+
+</main>
+</body>
+</html>
